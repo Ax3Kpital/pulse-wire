@@ -1,0 +1,223 @@
+# Entity dictionary used for classification and story grouping.
+#
+#   id:          stable identifier
+#   type:        institution | country | company | person | indicator
+#   aliases:     matched case-insensitively on word boundaries
+#   cs_aliases:  matched case-sensitively (short/ambiguous forms like "Fed", "BoE", "EU")
+#   categories:  categories this entity supports (classification signal)
+#   weight:      importance for story grouping (countries are weak: many different stories share them)
+
+entities:
+  # --- Institutions -----------------------------------------------------------
+  - id: federal-reserve
+    type: institution
+    aliases: [Federal Reserve, Federal Open Market Committee, FOMC]
+    cs_aliases: [Fed]
+    categories: [fed]
+  - id: jerome-powell
+    type: person
+    aliases: [Jerome Powell, Powell]
+    categories: [fed]
+  - id: ecb
+    type: institution
+    aliases: [European Central Bank, ECB]
+    categories: []
+  - id: donald-trump
+    type: person
+    aliases: [Donald Trump, Trump]
+  - id: xi-jinping
+    type: person
+    aliases: [Xi Jinping]
+    cs_aliases: [Xi]
+    categories: [geo-china]
+  - id: vladimir-putin
+    type: person
+    aliases: [Vladimir Putin, Putin]
+    categories: [geo-russia]
+  - id: christine-lagarde
+    type: person
+    aliases: [Christine Lagarde, Lagarde]
+  - id: bank-of-england
+    type: institution
+    aliases: [Bank of England]
+    cs_aliases: [BoE]
+  - id: bank-of-japan
+    type: institution
+    aliases: [Bank of Japan]
+    cs_aliases: [BoJ]
+  - id: pboc
+    type: institution
+    aliases: [People's Bank of China, PBOC]
+    categories: [geo-china]
+  - id: imf
+    type: institution
+    aliases: [International Monetary Fund, IMF]
+  - id: opec
+    type: institution
+    aliases: [OPEC, OPEC+]
+    categories: [oil-gas]
+  - id: sec
+    type: institution
+    aliases: [Securities and Exchange Commission]
+    cs_aliases: [SEC]
+  - id: fda
+    type: institution
+    aliases: [Food and Drug Administration]
+    cs_aliases: [FDA]
+    categories: [pharma]
+  - id: ema
+    type: institution
+    aliases: [European Medicines Agency]
+    cs_aliases: [EMA]
+    categories: [pharma]
+  - id: fdic
+    type: institution
+    aliases: [Federal Deposit Insurance Corporation, FDIC]
+    categories: [banking]
+  - id: bls
+    type: institution
+    aliases: [Bureau of Labor Statistics]
+    cs_aliases: [BLS]
+  - id: bea
+    type: institution
+    aliases: [Bureau of Economic Analysis]
+    cs_aliases: [BEA]
+  - id: eia
+    type: institution
+    aliases: [Energy Information Administration]
+    cs_aliases: [EIA]
+    categories: [energy]
+  - id: us-treasury
+    type: institution
+    aliases: [Treasury Department, Treasury Secretary, U.S. Treasury]
+  - id: nato
+    type: institution
+    aliases: [NATO]
+    categories: [geopolitics]
+  - id: european-commission
+    type: institution
+    aliases: [European Commission]
+    categories: [geo-europe]
+  - id: white-house
+    type: institution
+    aliases: [White House]
+    categories: [geo-us]
+  - id: kremlin
+    type: institution
+    aliases: [Kremlin]
+    categories: [geo-russia]
+
+  # --- Countries / regions (weak for grouping) --------------------------------
+  - id: united-states
+    type: country
+    weight: 0.3
+    aliases: [United States, Washington]
+    cs_aliases: [US, U.S., USA]
+    categories: [geo-us]
+  - id: china
+    type: country
+    weight: 0.3
+    aliases: [China, Beijing, Chinese]
+    categories: [geo-china]
+  - id: taiwan
+    type: country
+    weight: 0.5
+    aliases: [Taiwan, Taipei]
+    categories: [geo-china]
+  - id: russia
+    type: country
+    weight: 0.3
+    aliases: [Russia, Moscow, Russian]
+    categories: [geo-russia]
+  - id: ukraine
+    type: country
+    weight: 0.4
+    aliases: [Ukraine, Kyiv, Ukrainian]
+    categories: [geo-europe]
+  - id: european-union
+    type: country
+    weight: 0.3
+    aliases: [European Union, Brussels, Eurozone, euro zone, euro area]
+    cs_aliases: [EU]
+    categories: [geo-europe]
+  - id: germany
+    type: country
+    weight: 0.3
+    aliases: [Germany, Berlin, German]
+    categories: [geo-europe]
+  - id: france
+    type: country
+    weight: 0.3
+    aliases: [France, Paris, French]
+    categories: [geo-europe]
+  - id: japan
+    type: country
+    weight: 0.3
+    aliases: [Japan, Tokyo, Japanese]
+  - id: saudi-arabia
+    type: country
+    weight: 0.4
+    aliases: [Saudi Arabia, Riyadh, Saudi]
+  - id: iran
+    type: country
+    weight: 0.4
+    aliases: [Iran, Tehran, Iranian]
+    categories: [geopolitics]
+  - id: israel
+    type: country
+    weight: 0.4
+    aliases: [Israel, Israeli]
+
+  # --- Indicators ---------------------------------------------------------------
+  - id: cpi
+    type: indicator
+    aliases: [consumer price index]
+    cs_aliases: [CPI]
+    categories: [fed-cpi]
+  - id: pce
+    type: indicator
+    aliases: [personal consumption expenditures]
+    cs_aliases: [PCE]
+    categories: [fed-pce]
+  - id: nonfarm-payrolls
+    type: indicator
+    aliases: [nonfarm payrolls, non-farm payrolls, jobs report, employment situation]
+    categories: [fed-jobs]
+
+  # --- Companies ----------------------------------------------------------------
+  - {id: jpmorgan, type: company, aliases: [JPMorgan, JPMorgan Chase, JPMorgan Chase & Co], categories: [banking]}
+  - {id: goldman-sachs, type: company, aliases: [Goldman Sachs], categories: [banking]}
+  - {id: morgan-stanley, type: company, aliases: [Morgan Stanley], categories: [banking]}
+  - {id: bank-of-america, type: company, aliases: [Bank of America, BofA], categories: [banking]}
+  - {id: citigroup, type: company, aliases: [Citigroup, Citi], categories: [banking]}
+  - {id: wells-fargo, type: company, aliases: [Wells Fargo], categories: [banking]}
+  - {id: hsbc, type: company, aliases: [HSBC], categories: [banking]}
+  - {id: ubs, type: company, aliases: [UBS], categories: [banking]}
+  - {id: exxon, type: company, aliases: [Exxon, ExxonMobil, Exxon Mobil], categories: [oil-gas]}
+  - {id: chevron, type: company, aliases: [Chevron], categories: [oil-gas]}
+  - {id: shell, type: company, aliases: [Shell plc], categories: [oil-gas]}
+  - {id: bp, type: company, cs_aliases: [BP], categories: [oil-gas]}
+  - {id: totalenergies, type: company, aliases: [TotalEnergies], categories: [oil-gas, energy]}
+  - {id: saudi-aramco, type: company, aliases: [Saudi Aramco, Aramco], categories: [oil-gas]}
+  - {id: nextera, type: company, aliases: [NextEra, NextEra Energy], categories: [energy]}
+  - {id: pfizer, type: company, aliases: [Pfizer], categories: [pharma]}
+  - {id: eli-lilly, type: company, aliases: [Eli Lilly, Lilly], categories: [pharma]}
+  - {id: novo-nordisk, type: company, aliases: [Novo Nordisk], categories: [pharma]}
+  - {id: merck, type: company, aliases: [Merck], categories: [pharma]}
+  - {id: astrazeneca, type: company, aliases: [AstraZeneca], categories: [pharma]}
+  - {id: johnson-johnson, type: company, aliases: [Johnson & Johnson, J&J], categories: [pharma]}
+  - {id: moderna, type: company, aliases: [Moderna], categories: [biotech]}
+  - {id: amgen, type: company, aliases: [Amgen], categories: [biotech]}
+  - {id: vertex, type: company, aliases: [Vertex Pharmaceuticals], categories: [biotech]}
+  - {id: regeneron, type: company, aliases: [Regeneron], categories: [biotech]}
+  - {id: gilead, type: company, aliases: [Gilead, Gilead Sciences], categories: [biotech]}
+  - {id: biontech, type: company, aliases: [BioNTech], categories: [biotech]}
+  - {id: nvidia, type: company, aliases: [Nvidia], categories: [tech]}
+  - {id: apple, type: company, aliases: [Apple Inc], cs_aliases: [Apple], categories: [tech]}
+  - {id: microsoft, type: company, aliases: [Microsoft], categories: [tech]}
+  - {id: alphabet, type: company, aliases: [Alphabet, Google], categories: [tech]}
+  - {id: amazon, type: company, aliases: [Amazon], categories: [tech]}
+  - {id: meta, type: company, aliases: [Meta Platforms], categories: [tech]}
+  - {id: tsmc, type: company, aliases: [TSMC, Taiwan Semiconductor], categories: [tech]}
+  - {id: intel, type: company, aliases: [Intel], categories: [tech]}
+  - {id: amd, type: company, aliases: [Advanced Micro Devices], cs_aliases: [AMD], categories: [tech]}

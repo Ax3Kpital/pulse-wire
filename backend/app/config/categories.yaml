@@ -1,0 +1,137 @@
+# Category taxonomy + explainable classification rules.
+#
+# Scoring (see app/services/classifier.py):
+#   source default category        +2.0
+#   source section match           +2.0   (substring match on the publisher's declared section)
+#   strong keyword in title        +2.0   / in summary +1.0
+#   keyword in title               +1.25  / in summary +0.6
+#   entity (via entities/*.yaml)   +1.5 title / +0.75 summary
+# A category is assigned when its score >= threshold. Child categories imply their parent.
+# `requires_parent: true` means the child is only kept if the parent itself scored >= threshold
+# (e.g. a story mentioning China is not "Geopolitics / China" unless it is geopolitical),
+# unless the child comes from the source's own default_categories.
+# `exclude_entities` drops a category when one of those entities appears and none of the
+# category's supporting entities does. Sources can also set `exclude_categories`.
+# Keywords are case-insensitive, matched on word boundaries; a trailing * means prefix match.
+
+threshold: 2.0
+
+categories:
+  - slug: geopolitics
+    name: Geopolitics
+    sections: [world, politics, geopolitics, foreign affairs, international, diplomacy, defense]
+    strong_keywords:
+      - sanction*
+      - geopolitic*
+      - ceasefire
+      - invasion
+      - military
+      - diplomat*
+      - export control*
+      - trade war
+      - tariff*
+      - summit
+      - NATO
+    keywords:
+      - war
+      - troops
+      - missile*
+      - election*
+      - embargo
+      - treaty
+      - foreign minister
+      - secretary of state
+      - security council
+      - territor*
+      - conflict
+      - retaliat*
+      - drone*
+      - nuclear talks
+      - trade talks
+      - defense spending
+    children:
+      - slug: geo-us
+        name: US
+        requires_parent: true
+        keywords: [Washington, White House, Congress, Pentagon, State Department, US, U.S., American]
+      - slug: geo-china
+        name: China
+        requires_parent: true
+        keywords: [Beijing, Chinese, Taiwan, Xi Jinping]
+      - slug: geo-europe
+        name: Europe
+        requires_parent: true
+        keywords: [Brussels, European, EU, Eurozone, Germany, France, Ukraine]
+      - slug: geo-russia
+        name: Russia
+        requires_parent: true
+        keywords: [Moscow, Kremlin, Russian, Putin]
+
+  - slug: fed
+    name: FED
+    sections: [federal reserve, fomc]
+    strong_keywords: [FOMC, Federal Reserve, federal funds rate, Beige Book]
+    keywords: [monetary policy, central bank, rate decision, balance sheet, quantitative tightening]
+    # Other central banks / regions: not FED unless the Fed itself is mentioned.
+    exclude_entities: [ecb, christine-lagarde, bank-of-england, bank-of-japan, pboc, european-union]
+    children:
+      - slug: fed-rates
+        name: Rates
+        strong_keywords: [rate cut*, rate hike*, federal funds rate, basis point*, policy rate, interest rate*, FOMC statement, discount rate]
+        keywords: [yield*, Treasury, hold rates, holds rates, rate path]
+      - slug: fed-cpi
+        name: CPI
+        sections: [cpi, consumer prices]
+        strong_keywords: [CPI, consumer price index, consumer prices]
+        keywords: [inflation, core inflation, price index]
+      - slug: fed-pce
+        name: PCE
+        sections: [pce, personal income]
+        strong_keywords: [PCE, personal consumption expenditures, PCE price index, Personal Income and Outlays]
+        keywords: [personal income, consumer spending]
+      - slug: fed-jobs
+        name: Jobs
+        sections: [employment, labor, jobs]
+        strong_keywords: [nonfarm payroll*, payrolls, jobs report, unemployment rate, jobless claims, employment situation]
+        keywords: [labor market, hiring, wage growth, JOLTS, job openings]
+      - slug: fed-speeches
+        name: Speeches
+        sections: [speech, speeches, testimony]
+        strong_keywords: [speech, testimony, remarks by, speaks on]
+        keywords: [said in remarks, told lawmakers, press conference]
+
+  - slug: energy
+    name: Energy
+    sections: [energy, power, utilities, renewables]
+    strong_keywords: [power grid, electricity price*, renewable*, solar, wind power, nuclear power, LNG, natural gas, energy transition, utilities]
+    keywords: [energy, power plant*, battery storage, emissions, utility, gas prices, coal]
+
+  - slug: banking
+    name: Banking
+    sections: [banking, banks, financials, finance, financial services]
+    strong_keywords: [bank, banks, banking, lender*, deposit*, capital requirement*, stress test*, Basel, net interest income]
+    keywords: [loan*, credit card*, mortgage*, FDIC, investment bank*, wealth management, trading revenue]
+
+  - slug: biotech
+    name: Biotech
+    sections: [biotech, biotechnology, life sciences]
+    strong_keywords: [biotech*, gene therap*, cell therap*, CRISPR, mRNA, antibody, biologic*, oncology pipeline]
+    keywords: [clinical trial*, phase 1, phase 2, phase 3, trial data, biosimilar*, IPO]
+
+  - slug: pharma
+    name: Pharma
+    sections: [pharma, pharmaceuticals, drugs, health, healthcare]
+    strong_keywords: [FDA approval, FDA approves, drugmaker*, pharmaceutical*, pharma, drug pric*, EMA]
+    keywords: [drug, drugs, vaccine*, approval, label expansion, patent*, generic*, recall*, GLP-1, obesity drug*]
+
+  - slug: oil-gas
+    name: Oil & Gas
+    sections: [oil, oil and gas, commodities, upstream]
+    strong_keywords: [crude, oil price*, OPEC, Brent, WTI, barrels, refiner*, upstream, oil major*, oil output, oil production, oil exports, production cut*, diesel, LNG]
+    keywords: [oil, gasoline, drilling, shale, pipeline*, inventories, rig count, oilfield]
+
+  - slug: tech
+    name: Tech
+    sections: [technology, tech, software, semiconductors, internet]
+    strong_keywords: [semiconductor*, chipmak*, chips, artificial intelligence, AI, cloud computing, software, data center*, smartphone*]
+    keywords: [tech, technology, cybersecurity, startup*, app store, antitrust, GPU*, foundry, datacenter*]

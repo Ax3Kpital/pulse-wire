@@ -1,0 +1,8 @@
+# Fictional companies used only by the demo fixtures (app/demo/fixtures.json).
+entities:
+  - {id: northwind-bank, type: company, aliases: [Northwind Bank, Northwind Financial], categories: [banking]}
+  - {id: corvalis-pharma, type: company, aliases: [Corvalis Pharma, Corvalis], categories: [pharma]}
+  - {id: helixa-bio, type: company, aliases: [Helixa Bio, Helixa Biosciences, Helixa], categories: [biotech]}
+  - {id: quantel-semi, type: company, aliases: [Quantel Semiconductor, Quantel], categories: [tech]}
+  - {id: aurora-grid, type: company, aliases: [Aurora Grid, Aurora Grid Energy], categories: [energy]}
+  - {id: meridian-oil, type: company, aliases: [Meridian Oil, Meridian Petroleum], categories: [oil-gas]}

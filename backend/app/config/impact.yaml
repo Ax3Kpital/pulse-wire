@@ -1,0 +1,140 @@
+# Impact analysis: every collected report gets its own score from 1 to 10, deterministic and
+# explainable (no external AI). Edit freely, then run `python -m app reclassify`.
+#
+# Per report:
+#   points = relevance (matches one of your categories) + tone (sentiment intensity)
+#            + event severity + market-moving source + magnitude of figures + key actors
+#   reports without any category (sport, celebrity...) are multiplied by `off_topic_factor`,
+#   explainers / opinion / live blogs by `followup.factor` (the event itself ranks higher)
+# Per story (the card): best report + coverage bonus (more publishers = more important).
+# Points become a 1-10 score through `score_bands`, and the score a colour through `levels`.
+
+# A score of N needs at least score_bands[N-2] points (score 1 = below the first band).
+#             score:  2   3   4   5   6   7   8   9   10
+score_bands:        [10, 20, 28, 37, 46, 55, 64, 76, 88]
+
+# Colour levels by score (inclusive minimum).
+levels:
+  - {name: low,       label: Normal,    min: 1}   # green: routine, almost irrelevant
+  - {name: moderate,  label: Moderate,  min: 4}   # yellow: worth a glance
+  - {name: important, label: Important, min: 6}   # orange
+  - {name: critical,  label: Critical,  min: 8}   # red
+
+off_topic_factor: 0.5
+
+# A report that matches at least one sidebar category is relevant to you.
+relevance_points: 10
+
+# Follow-up formats: analysis, explainers, opinion, live blogs, podcasts (regex, case-insensitive).
+followup:
+  factor: 0.75
+  patterns: ['^(how|why|what|who|where|when|is|are|can|could|should|will|does|do)\b',
+             '\?\s*$', '^(analysis|opinion|comment|explainer|podcast|video|watch|live|ars live)\b',
+             '\b(explained|what we know|what to know|things to know|reacts to)\b']
+
+# Bonus by number of DISTINCT publishers carrying the story (index = publishers, capped).
+coverage_points: [0, 0, 8, 14, 20, 24]
+
+# ---------------------------------------------------------------------------- sentiment / tone
+# Lexicon-based sentiment (same idea as VADER, tuned for business and world news):
+#   polarity -3..+3 per term, "*" = prefix, multi-word terms win over single words,
+#   a negator in the 3 preceding words flips and halves the polarity ("not a recession"),
+#   a booster in the 2 preceding words multiplies it ("sharply lower", "biggest drop").
+#   Headline counts fully, the RSS description (when the source allows it) counts half.
+#   tone = sum / sqrt(sum^2 + 15)  ->  -1 (very negative) .. +1 (very positive)
+# Strong tone in either direction raises the impact; negative news weighs more.
+sentiment:
+  summary_weight: 0.5
+  normalization: 15
+  neutral_band: 0.2          # |tone| below this is shown as "neutral"
+  negative_points: 22        # points at tone = -1
+  positive_points: 14        # points at tone = +1
+  negators: [not, "no", never, without, nor, neither, fails, failed, avoid, avoids, avoided,
+             unlikely, denies, denied]
+  boosters: [sharply, sharp, steep, steepest, biggest, largest, worst, massive, huge, record,
+             historic, severe, deep, deepest, major, dramatic, unprecedented, sweeping, deadly]
+  booster_factor: 1.3
+  lexicon:
+    # --- very negative (-3)
+    -3: [jobless claims surge, unemployment jumps, inflation surges, inflation soars,
+         crash*, collaps*, plunge*, plummet*, war, wars, invasion, invade*, killed, killing*,
+         massacre, bankrupt*, bankruptcy, default, defaults, defaulted, catastroph*, devastat*,
+         meltdown, panic*, recession, fraud, rout, explosion, earthquake, genocide,
+         profit warning, nuclear threat, terror attack]
+    # --- negative (-2)
+    -2: [attack*, airstrike*, missile*, bomb*, sanction*, tariff*, slump*, tumbl*, sink*,
+         crisis, crises, layoff*, job cuts, fired, ousted, scandal, outage, hack, hacked,
+         hackers, breach*, shortage*, downgrade*, disappoint*, slowdown, contraction,
+         escalat*, threat, threats, threaten*, conflict, violence, unrest, turmoil, selloff,
+         sell-off, bear market, retaliat*, worst, halt*, shutdown, evacuat*, flood*,
+         hurricane, wildfire*, dies, died, dead, deaths, injured, emergency, bearish, slashes,
+         wipes out, losses, warns, warning]
+    # --- mildly negative (-1)
+    -1: [prices rise, prices rose, prices rising, rising prices, inflation rises, inflation rose,
+         inflation rising, inflation increases, inflation picks up, items increases, costs rise,
+         unemployment rises, unemployment rose, jobless claims rise, jobless rate rises,
+         fall, falls, fell, falling, drop, drops, dropped, decline*, loss, weak*, fear*,
+         concern*, risk*, resign*, steps down, probe, investigation, lawsuit, sues, sued,
+         misses, missed, slow*, shrink*, deficit, tension*, protest*, volatil*, ban, bans,
+         banned, struggle*, delay*, recall*, suspend*, arrest*, charged, guilty, uncertain*,
+         inflation, cuts jobs]
+    # --- mildly positive (+1)
+    1: [rise, rises, rose, rising, gain, gains, gained, climb*, boost*, beat, beats, growth,
+        grow, grows, growing, profit, profits, deal, agreement, recover*, rebound*, optimis*,
+        win, wins, won, expand*, hiring, eases, easing, cools, cooling, outperform*,
+        upbeat, stabiliz*]
+    # --- positive (+2)
+    2: [surge*, soar*, rally, rallies, rallied, record high, upgrade*, approv*, breakthrough,
+        ceasefire, peace, truce, success*, bullish, jump, jumps, jumped, skyrocket*]
+
+# ---------------------------------------------------------------------------- event severity
+# Matched on the headline (case-insensitive, * = prefix; ALL-CAPS terms are case-sensitive).
+# The best tier found counts fully, each further distinct match adds 4 (max_event_points).
+events:
+  critical:
+    points: 25
+    terms: [rate cut*, rate hike*, cuts rates, raises rates, holds rates, FOMC statement,
+            emergency, invasion, invades, declares war, ceasefire, missile*, airstrike*,
+            attack*, retaliat*, war, troops, nuclear, coup, sanction*, tariff*, default*,
+            bankrupt*, chapter 11, bailout, collapse*, crash*, plunge*, recession, resign*,
+            steps down, ousted, acquire*, acquisition, merger, takeover, record high,
+            record low]
+  strong:
+    points: 15
+    terms: [earnings, profit warning, guidance, forecast cut, layoff*, job cuts, jobs report,
+            payrolls, Employment Situation, CPI, Consumer Price Index, inflation, GDP,
+            interest rate*, probe, investigation, antitrust, lawsuit, FDA approv*, recall*,
+            outage, cyberattack, hack*, election*, summit, OPEC, strike, surge*, soar*,
+            tumble*, slump*]
+max_event_points: 30
+
+# ---------------------------------------------------------------------------- other signals
+# Market-moving official releases: the Fed's policy decisions and the monthly CPI / jobs
+# releases are the biggest scheduled market events, so they are critical on their own.
+source_points:
+  fed-monetary: 30   # + "FOMC statement" (critical event) makes a policy decision red
+  bls-cpi: 45
+  bls-jobs: 45
+  bea: 12
+  ecb-press: 15
+  boe-news: 8
+  fed-speeches: 8
+  fed-testimony: 10
+  eia-press: 8
+  fda-press: 8
+max_source_points: 45
+
+magnitude:
+  money_bn_10: 12   # >= $10bn
+  money_bn_1: 7     # >= $1bn
+  pct_10: 8         # a move of >= 10%
+  pct_5: 5          # a move of >= 5%
+max_magnitude_points: 12
+
+key_actors:
+  points: 5
+  max_points: 15
+  entities: [donald-trump, xi-jinping, vladimir-putin, federal-reserve, jerome-powell, ecb, opec,
+             white-house, kremlin, us-treasury, nato, united-states, china, russia, ukraine, iran,
+             israel, taiwan, european-union, nvidia, apple, microsoft, alphabet, amazon, meta,
+             tsmc, jpmorgan, goldman-sachs, exxon, saudi-aramco, pfizer, eli-lilly, novo-nordisk]

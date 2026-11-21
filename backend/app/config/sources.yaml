@@ -1,0 +1,824 @@
+# Source registry. Edit this file to add/remove sources; restart is not required
+# (it is re-read at the start of every scan).
+#
+# Required per source: key, name, connector, policy.
+#   connector:  demo | rss | json_api | reuters_connect | ft | scrapling
+#   policy:     metadata_only | temporary_excerpt | indexable_content
+#   retention_days:           how long excerpts/content are kept (then purged)
+#   metadata_retention_days:  optional; delete the whole record after N days
+#   url / url_env:            public URL, or the NAME of a .env variable holding a private URL
+#   credentials_env:          {field: ENV_VAR_NAME}; values live only in .env
+#   priority:                 higher = preferred as a story's primary source
+#   default_categories / exclude_categories / section_map: classification hints
+#
+# Reuters, Bloomberg, FT and the Washington Post: ONLY via feeds/APIs you are licensed for
+# (connector rss/json_api/reuters_connect/ft with your private URL + credentials). Their
+# article pages are never fetched, and the scrapling connector refuses them.
+
+sources:
+  # ------------------------------------------------------------------ demo (local fixtures)
+  - key: demo-wire
+    name: Demo Wire
+    connector: demo
+    demo: true
+    enabled: true
+    policy: temporary_excerpt
+    retention_days: 30
+    options: {feed: demo-wire}
+  - key: demo-markets
+    name: Demo Markets Daily
+    connector: demo
+    demo: true
+    enabled: true
+    policy: temporary_excerpt
+    retention_days: 30
+    options: {feed: demo-markets}
+  - key: demo-policy
+    name: Demo Policy Review
+    connector: demo
+    demo: true
+    enabled: true
+    policy: metadata_only
+    options: {feed: demo-policy}
+  - key: demo-industry
+    name: Demo Industry Journal
+    connector: demo
+    demo: true
+    enabled: true
+    policy: indexable_content
+    retention_days: 30
+    options: {feed: demo-industry}
+  - key: demo-flaky
+    name: Demo Flaky Feed
+    connector: demo
+    demo: true
+    enabled: false  # set true to see how a failing source is reported in the UI
+    policy: metadata_only
+    options: {feed: demo-flaky, simulate_error: "upstream returned 503"}
+
+  # ------------------------------------------------------------------ US Federal Reserve
+  # US federal government works are public domain -> indexable_content.
+  - key: fed-monetary
+    name: Federal Reserve — Monetary Policy
+    publisher: Federal Reserve Board
+    connector: rss
+    enabled: true
+    url: https://www.federalreserve.gov/feeds/press_monetary.xml
+    homepage: https://www.federalreserve.gov/newsevents/pressreleases.htm
+    policy: indexable_content
+    retention_days: 180
+    priority: 90
+    default_categories: [fed]
+  - key: fed-speeches
+    name: Federal Reserve — Speeches
+    publisher: Federal Reserve Board
+    connector: rss
+    enabled: true
+    url: https://www.federalreserve.gov/feeds/speeches.xml
+    homepage: https://www.federalreserve.gov/newsevents/speeches.htm
+    policy: indexable_content
+    retention_days: 180
+    priority: 90
+    default_categories: [fed, fed-speeches]
+  - key: fed-testimony
+    name: Federal Reserve — Testimony
+    publisher: Federal Reserve Board
+    connector: rss
+    enabled: true
+    url: https://www.federalreserve.gov/feeds/testimony.xml
+    policy: indexable_content
+    retention_days: 180
+    priority: 90
+    default_categories: [fed, fed-speeches]
+  - key: fed-banking
+    name: Federal Reserve — Banking Regulation
+    publisher: Federal Reserve Board
+    connector: rss
+    enabled: true
+    url: https://www.federalreserve.gov/feeds/press_bcreg.xml
+    policy: indexable_content
+    retention_days: 180
+    priority: 85
+    default_categories: [banking]
+
+  # ------------------------------------------------------------------ US statistics agencies
+  - key: bls-cpi
+    name: BLS — Consumer Price Index
+    publisher: U.S. Bureau of Labor Statistics
+    connector: rss
+    enabled: true
+    url: https://www.bls.gov/feed/cpi.rss
+    homepage: https://www.bls.gov/cpi/
+    policy: indexable_content
+    retention_days: 180
+    priority: 85
+    default_categories: [fed-cpi]
+  - key: bls-jobs
+    name: BLS — Employment Situation
+    publisher: U.S. Bureau of Labor Statistics
+    connector: rss
+    enabled: true
+    url: https://www.bls.gov/feed/empsit.rss
+    homepage: https://www.bls.gov/ces/
+    policy: indexable_content
+    retention_days: 180
+    priority: 85
+    default_categories: [fed-jobs]
+  - key: bea
+    name: BEA — Economic Releases (GDP, PCE)
+    publisher: U.S. Bureau of Economic Analysis
+    connector: rss
+    enabled: true
+    url: https://apps.bea.gov/rss/rss.xml
+    homepage: https://www.bea.gov/news
+    policy: indexable_content
+    retention_days: 180
+    priority: 85
+
+  # ------------------------------------------------------------------ other central banks
+  - key: ecb-press
+    name: ECB — Press Releases
+    publisher: European Central Bank
+    connector: rss
+    enabled: true
+    url: https://www.ecb.europa.eu/rss/press.html
+    homepage: https://www.ecb.europa.eu/press/pr/html/index.en.html
+    policy: temporary_excerpt
+    retention_days: 30
+    priority: 85
+    exclude_categories: [fed]
+  - key: boe-news
+    name: Bank of England — News
+    publisher: Bank of England
+    connector: rss
+    enabled: true
+    url: https://www.bankofengland.co.uk/rss/news
+    policy: temporary_excerpt
+    retention_days: 30
+    priority: 80
+    exclude_categories: [fed]
+  - key: boc-press
+    name: Bank of Canada — Press Releases
+    publisher: Bank of Canada
+    connector: rss
+    enabled: true
+    url: https://www.bankofcanada.ca/content_type/press-releases/feed/
+    policy: temporary_excerpt
+    retention_days: 30
+    priority: 80
+    exclude_categories: [fed]
+
+  # ------------------------------------------------------------------ energy / health regulators
+  - key: eia-press
+    name: EIA — Press Releases
+    publisher: U.S. Energy Information Administration
+    connector: rss
+    enabled: true
+    url: https://www.eia.gov/rss/press_rss.xml
+    homepage: https://www.eia.gov/pressroom/releases.php
+    policy: indexable_content
+    retention_days: 180
+    priority: 80
+    default_categories: [energy]
+  - key: fda-press
+    name: FDA — Press Announcements
+    publisher: U.S. Food and Drug Administration
+    connector: rss
+    enabled: true
+    url: https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml
+    policy: indexable_content
+    retention_days: 180
+    priority: 85
+  - key: fda-drugs
+    name: FDA — Drugs
+    publisher: U.S. Food and Drug Administration
+    connector: rss
+    # Disabled: this feed announces updates to evergreen FDA web pages ("What's New Related to
+    # Drugs", "Notable Approvals"), not news. FDA news comes from fda-press.
+    enabled: false
+    url: https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/drugs/rss.xml
+    policy: indexable_content
+    retention_days: 180
+    priority: 85
+    default_categories: [pharma]
+  - key: ema-news
+    name: EMA — News
+    publisher: European Medicines Agency
+    connector: rss
+    enabled: true
+    url: https://www.ema.europa.eu/en/news.xml
+    policy: temporary_excerpt
+    retention_days: 30
+    priority: 80
+    default_categories: [pharma]
+
+  # ------------------------------------------------------------------ markets regulator
+  - key: sec-press
+    name: SEC — Press Releases
+    publisher: U.S. Securities and Exchange Commission
+    connector: rss
+    enabled: true
+    requires_contact: true  # SEC fair-access policy: declare contact info (NEWS_CONTACT)
+    url: https://www.sec.gov/news/pressreleases.rss
+    policy: indexable_content
+    retention_days: 180
+    priority: 85
+    min_interval_seconds: 1.0
+
+  # ------------------------------------------------------------------ geopolitics (official)
+  - key: whitehouse
+    name: The White House — News
+    publisher: The White House
+    connector: rss
+    enabled: true
+    url: https://www.whitehouse.gov/news/feed/
+    policy: indexable_content
+    retention_days: 180
+    priority: 80
+  - key: un-peace
+    name: UN News — Peace and Security
+    publisher: United Nations
+    connector: rss
+    enabled: true
+    url: https://news.un.org/feed/subscribe/en/news/topic/peace-and-security/feed/rss.xml
+    policy: temporary_excerpt
+    retention_days: 30
+    priority: 75
+    default_categories: [geopolitics]
+    exclude_categories: [fed]
+  - key: eu-council
+    name: Council of the EU — Press Releases
+    publisher: Council of the European Union
+    connector: rss
+    enabled: true
+    url: https://www.consilium.europa.eu/en/rss/pressreleases.ashx
+    policy: temporary_excerpt
+    retention_days: 30
+    priority: 75
+    exclude_categories: [fed]
+  - key: kremlin
+    name: Kremlin — President's News (official)
+    publisher: Office of the President of Russia
+    connector: rss
+    enabled: true
+    url: http://en.kremlin.ru/events/president/news/feed
+    policy: temporary_excerpt
+    retention_days: 30
+    priority: 70
+    default_categories: [geopolitics, geo-russia]
+    exclude_categories: [fed]
+
+  # ------------------------------------------------------------------ free-to-read publishers (public RSS)
+  # Preferred as a story's primary source (priority 65 > paywalled 60). Headline + link only.
+  - key: cnbc-top
+    name: CNBC — Top News
+    publisher: CNBC
+    connector: rss
+    enabled: true
+    url: "https://www.cnbc.com/id/100003114/device/rss/rss.html"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: cnbc-business
+    name: CNBC — Business
+    publisher: CNBC
+    connector: rss
+    enabled: true
+    url: "https://www.cnbc.com/id/10001147/device/rss/rss.html"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: cnbc-economy
+    name: CNBC — Economy
+    publisher: CNBC
+    connector: rss
+    enabled: true
+    url: "https://www.cnbc.com/id/20910258/device/rss/rss.html"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: cnbc-finance
+    name: CNBC — Finance
+    publisher: CNBC
+    connector: rss
+    enabled: true
+    url: "https://www.cnbc.com/id/10000664/device/rss/rss.html"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: cnbc-tech
+    name: CNBC — Technology
+    publisher: CNBC
+    connector: rss
+    enabled: true
+    url: "https://www.cnbc.com/id/19854910/device/rss/rss.html"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+    default_categories: [tech]
+  - key: cnbc-world
+    name: CNBC — World
+    publisher: CNBC
+    connector: rss
+    enabled: true
+    url: "https://www.cnbc.com/id/100727362/device/rss/rss.html"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: bbc-business
+    name: BBC — Business
+    publisher: BBC News
+    connector: rss
+    enabled: true
+    url: "https://feeds.bbci.co.uk/news/business/rss.xml"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: bbc-world
+    name: BBC — World
+    publisher: BBC News
+    connector: rss
+    enabled: true
+    url: "https://feeds.bbci.co.uk/news/world/rss.xml"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: bbc-tech
+    name: BBC — Technology
+    publisher: BBC News
+    connector: rss
+    enabled: true
+    url: "https://feeds.bbci.co.uk/news/technology/rss.xml"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+    default_categories: [tech]
+  - key: guardian-business
+    name: The Guardian — Business
+    publisher: The Guardian
+    connector: rss
+    enabled: true
+    url: "https://www.theguardian.com/business/rss"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: guardian-economics
+    name: The Guardian — Economics
+    publisher: The Guardian
+    connector: rss
+    enabled: true
+    url: "https://www.theguardian.com/business/economics/rss"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: guardian-world
+    name: The Guardian — World
+    publisher: The Guardian
+    connector: rss
+    enabled: true
+    url: "https://www.theguardian.com/world/rss"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: guardian-tech
+    name: The Guardian — Technology
+    publisher: The Guardian
+    connector: rss
+    enabled: true
+    url: "https://www.theguardian.com/technology/rss"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+    default_categories: [tech]
+  - key: aljazeera
+    name: Al Jazeera — All News
+    publisher: Al Jazeera
+    connector: rss
+    enabled: true
+    url: "https://www.aljazeera.com/xml/rss/all.xml"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: dw-business
+    name: DW — Business
+    publisher: Deutsche Welle
+    connector: rss
+    enabled: true
+    url: "https://rss.dw.com/rdf/rss-en-bus"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: dw-world
+    name: DW — World
+    publisher: Deutsche Welle
+    connector: rss
+    enabled: true
+    url: "https://rss.dw.com/rdf/rss-en-world"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: npr-business
+    name: NPR — Business
+    publisher: NPR
+    connector: rss
+    enabled: true
+    url: "https://feeds.npr.org/1006/rss.xml"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: npr-world
+    name: NPR — World
+    publisher: NPR
+    connector: rss
+    enabled: true
+    url: "https://feeds.npr.org/1004/rss.xml"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: euronews-business
+    name: Euronews — Business
+    publisher: Euronews
+    connector: rss
+    enabled: true
+    url: "https://www.euronews.com/rss?level=theme&name=business"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: biopharmadive
+    name: BioPharma Dive
+    publisher: BioPharma Dive
+    connector: rss
+    enabled: true
+    url: "https://www.biopharmadive.com/feeds/news/"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: statnews
+    name: STAT News
+    publisher: STAT
+    connector: rss
+    enabled: true
+    url: "https://www.statnews.com/feed/"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: oilprice
+    name: OilPrice.com
+    publisher: OilPrice.com
+    connector: rss
+    enabled: true
+    url: "https://oilprice.com/rss/main"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+  - key: utilitydive
+    name: Utility Dive
+    publisher: Utility Dive
+    connector: rss
+    enabled: true
+    url: "https://www.utilitydive.com/feeds/news/"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+    default_categories: [energy]
+  - key: bankingdive
+    name: Banking Dive
+    publisher: Banking Dive
+    connector: rss
+    enabled: true
+    url: "https://www.bankingdive.com/feeds/news/"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+    default_categories: [banking]
+  - key: techcrunch
+    name: TechCrunch
+    publisher: TechCrunch
+    connector: rss
+    enabled: true
+    url: "https://techcrunch.com/feed/"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+    default_categories: [tech]
+  - key: arstechnica
+    name: Ars Technica
+    publisher: Ars Technica
+    connector: rss
+    enabled: true
+    url: "https://feeds.arstechnica.com/arstechnica/index"
+    policy: metadata_only
+    classify_with_summary: true
+    obey_robots: true
+    priority: 65
+    min_interval_seconds: 3
+    default_categories: [tech]
+
+  # ------------------------------------------------------------------ major publishers (public RSS)
+  # Added at the user's request (2026-11-14). Only the publishers' own public RSS feeds are read:
+  # headline, date and link are stored (metadata_only); article pages are never fetched (enforced in
+  # access_policy.py). The feed description is used in memory for classification only.
+  # Reuters has no public RSS: use the licensed reuters-connect source below.
+  - key: ft-home
+    name: Financial Times — Home
+    publisher: Financial Times
+    connector: rss
+    enabled: true
+    url: https://www.ft.com/rss/home
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: ft-markets
+    name: Financial Times — Markets
+    publisher: Financial Times
+    connector: rss
+    enabled: true
+    url: https://www.ft.com/markets?format=rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: ft-world
+    name: Financial Times — World
+    publisher: Financial Times
+    connector: rss
+    enabled: true
+    url: https://www.ft.com/world?format=rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: ft-companies
+    name: Financial Times — Companies
+    publisher: Financial Times
+    connector: rss
+    enabled: true
+    url: https://www.ft.com/companies?format=rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: ft-economy
+    name: Financial Times — Global Economy
+    publisher: Financial Times
+    connector: rss
+    enabled: true
+    url: https://www.ft.com/global-economy?format=rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: ft-technology
+    name: Financial Times — Technology
+    publisher: Financial Times
+    connector: rss
+    enabled: true
+    url: https://www.ft.com/technology?format=rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+    default_categories: [tech]
+  - key: ft-energy
+    name: Financial Times — Energy
+    publisher: Financial Times
+    connector: rss
+    enabled: true
+    url: https://www.ft.com/energy?format=rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+    default_categories: [energy]
+  - key: bloomberg-markets
+    name: Bloomberg — Markets
+    publisher: Bloomberg
+    connector: rss
+    enabled: true
+    url: https://feeds.bloomberg.com/markets/news.rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: bloomberg-politics
+    name: Bloomberg — Politics
+    publisher: Bloomberg
+    connector: rss
+    enabled: true
+    url: https://feeds.bloomberg.com/politics/news.rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: bloomberg-technology
+    name: Bloomberg — Technology
+    publisher: Bloomberg
+    connector: rss
+    enabled: true
+    url: https://feeds.bloomberg.com/technology/news.rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+    default_categories: [tech]
+  - key: bloomberg-economics
+    name: Bloomberg — Economics
+    publisher: Bloomberg
+    connector: rss
+    enabled: true
+    url: https://feeds.bloomberg.com/economics/news.rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: bloomberg-industries
+    name: Bloomberg — Industries
+    publisher: Bloomberg
+    connector: rss
+    enabled: true
+    url: https://feeds.bloomberg.com/industries/news.rss
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: wapo-business
+    name: Washington Post — Business
+    publisher: The Washington Post
+    connector: rss
+    enabled: true
+    url: https://feeds.washingtonpost.com/rss/business
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: wapo-world
+    name: Washington Post — World
+    publisher: The Washington Post
+    connector: rss
+    enabled: true
+    url: https://feeds.washingtonpost.com/rss/world
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: wapo-politics
+    name: Washington Post — Politics
+    publisher: The Washington Post
+    connector: rss
+    enabled: true
+    url: https://feeds.washingtonpost.com/rss/politics
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+  - key: wapo-technology
+    name: Washington Post — Technology
+    publisher: The Washington Post
+    connector: rss
+    enabled: true
+    url: https://feeds.washingtonpost.com/rss/business/technology
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+    default_categories: [tech]
+  - key: wapo-national
+    name: Washington Post — National
+    publisher: The Washington Post
+    connector: rss
+    enabled: true
+    url: https://feeds.washingtonpost.com/rss/national
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    classify_with_summary: true
+    obey_robots: true
+    priority: 60
+    min_interval_seconds: 3
+
+  # ------------------------------------------------------------------ licensed (disabled until configured)
+  - key: reuters-connect
+    name: Reuters (Reuters Connect API)
+    publisher: Reuters
+    connector: reuters_connect
+    enabled: true  # stays inactive until the URL + token below exist in .env
+    url_env: REUTERS_CONNECT_API_URL
+    credentials_env: {access_token: REUTERS_CONNECT_ACCESS_TOKEN}
+    policy: metadata_only
+    priority: 70
+  - key: ft-api
+    name: Financial Times (licensed API)
+    publisher: Financial Times
+    connector: ft
+    enabled: true  # stays inactive until FT_API_URL + FT_API_KEY exist in .env
+    url_env: FT_API_URL
+    credentials_env: {api_key: FT_API_KEY}
+    policy: metadata_only
+    paywalled: true  # subscription required to read the article
+    priority: 70
+  - key: licensed-rss-1
+    name: Licensed publisher feed (e.g. syndication RSS)
+    connector: rss
+    enabled: true  # stays inactive until LICENSED_RSS_1_URL exists in .env
+    url_env: LICENSED_RSS_1_URL
+    policy: metadata_only
+    priority: 70
+
+  # ------------------------------------------------------------------ scrapling (allowlist only)
+  - key: scrapling-example
+    name: Allowlisted site (example)
+    connector: scrapling
+    enabled: false
+    url: https://example.org/news/
+    policy: metadata_only
+    min_interval_seconds: 10
+    options:
+      permission_confirmed: false  # set true only if the site permits automated access
+      allowlist: ["https://example.org/news/"]
+      mode: page
+      item_selector: article
+      title_selector: "h2 a::text"
+      link_selector: "h2 a::attr(href)"
+      date_selector: "time::attr(datetime)"
