@@ -64,7 +64,7 @@ def create_app(*, database_url: str | None = None, start_scheduler: bool | None 
                 app.state.scheduler.shutdown(wait=False)
             app.state.coordinator.wait(timeout=30)
 
-    app = FastAPI(title="Local News Aggregator", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="Pulse Wire", version="0.1.0", lifespan=lifespan)
     app.include_router(router)
     _mount_frontend(app)
     return app

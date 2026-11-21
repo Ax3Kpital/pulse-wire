@@ -3,7 +3,7 @@
 ## Structură
 
 ```text
-news-aggregator/
+pulse-wire/
   backend/
     app/
       api/            # rute FastAPI (health, stories, categories, sources, scan)

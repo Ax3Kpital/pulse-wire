@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     # Identifiable user agent. Some publishers (e.g. SEC) require contact details here;
     # set NEWS_CONTACT to an email you control to enable those sources.
     contact: str = ""
-    user_agent_base: str = "LocalNewsAggregator/0.1 (personal, single-user; non-commercial)"
+    user_agent_base: str = "PulseWire/0.1 (personal, single-user; non-commercial)"
 
     http_timeout_seconds: float = 20.0
     http_max_retries: int = 3

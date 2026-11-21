@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  LaunchAgent: starts the news aggregator backend (127.0.0.1 only) when you log in.
+  LaunchAgent: starts the Pulse Wire backend (127.0.0.1 only) when you log in.
   Rendered by scripts/launchagent.sh install (replaces __REPO__). The browser is not involved:
   open http://127.0.0.1:8765 whenever you like.
 -->
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.local.news-aggregator</string>
+  <string>com.local.pulse-wire</string>
   <key>ProgramArguments</key>
   <array>
     <string>__REPO__/.venv/bin/python</string>

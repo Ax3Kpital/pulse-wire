@@ -115,7 +115,7 @@ def test_rss_conditional_headers_and_304() -> None:
     assert [i.external_id for i in first.items] == ["a1", "a0"]
     assert first.items[0].section == "Monetary Policy"
     assert first.items[0].published_at == datetime(2026, 11, 13, 18, tzinfo=UTC)
-    assert "LocalNewsAggregator" in seen[0].headers["User-Agent"]
+    assert "PulseWire" in seen[0].headers["User-Agent"]
 
     second = conn.fetch_since(first.cursor)
     assert second.not_modified and second.items == []

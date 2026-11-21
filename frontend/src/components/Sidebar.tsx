@@ -15,7 +15,7 @@ export function Sidebar({ categories, sources, active, onSelect }: Props) {
     <aside className="sidebar" aria-label="Categories and sources">
       <div className="brand">
         <span className="brand-mark" aria-hidden="true">N</span>
-        <span className="brand-name">Newsroom</span>
+        <span className="brand-name">Pulse Wire</span>
       </div>
 
       <nav aria-label="Categories">

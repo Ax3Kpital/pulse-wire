@@ -1,5 +1,5 @@
 [project]
-name = "news-aggregator"
+name = "pulse-wire"
 version = "0.1.0"
 description = "Local, single-user news aggregator (earnings, companies, geopolitics, monetary policy)."
 requires-python = ">=3.12"

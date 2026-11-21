@@ -2,7 +2,7 @@
 # Manage the LaunchAgent that starts the backend at login.
 # Usage: scripts/launchagent.sh install|uninstall|start|stop|status
 source "$(dirname "$0")/_env.sh"
-LABEL="com.local.news-aggregator"
+LABEL="com.local.pulse-wire"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 DOMAIN="gui/$(id -u)"
 

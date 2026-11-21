@@ -1,6 +1,6 @@
-# News Aggregator (local, single-user)
+# Pulse Wire (local, single-user)
 
-A local news aggregator for earnings, companies, geopolitics and monetary policy.
+Pulse Wire is a local news aggregator for earnings, companies, geopolitics and monetary policy.
 It runs on macOS and Linux, without Docker, and listens exclusively on `127.0.0.1:8765`. (Windows: use WSL.) Only the optional autostart helper is macOS-specific.
 
 - **One story per card.** When several publications report the same event, their reports appear in a collapsible list, each with attribution and an `Open original` link.
@@ -34,8 +34,8 @@ It runs on macOS and Linux, without Docker, and listens exclusively on `127.0.0.
 Requirements: macOS or Linux, Python 3.12+ (tested with 3.14) and internet access for the first install.
 
 ```bash
-git clone <repository-url> news-aggregator
-cd news-aggregator
+git clone https://github.com/pingulinux87/pulse-wire.git
+cd pulse-wire
 scripts/setup.sh
 ```
 
@@ -231,7 +231,7 @@ The backup uses the SQLite backup API, so it is safe while the app is running. D
 For an automatic daily backup, add to `crontab -e`:
 
 ```
-0 3 * * * /Users/<user>/news-aggregator/scripts/backup.sh >/dev/null 2>&1
+0 3 * * * /Users/<user>/pulse-wire/scripts/backup.sh >/dev/null 2>&1
 ```
 
 ## Autostart (LaunchAgent, macOS only)
@@ -246,7 +246,7 @@ scripts/launchagent.sh start
 scripts/launchagent.sh uninstall  # disables autostart
 ```
 
-The LaunchAgent starts only the backend (which also serves the UI) on `127.0.0.1`. The browser is not a dependency of the service; open `http://127.0.0.1:8765` whenever you like. The template is [`launchd/com.local.news-aggregator.plist.template`](launchd/com.local.news-aggregator.plist.template).
+The LaunchAgent starts only the backend (which also serves the UI) on `127.0.0.1`. The browser is not a dependency of the service; open `http://127.0.0.1:8765` whenever you like. The template is [`launchd/com.local.pulse-wire.plist.template`](launchd/com.local.pulse-wire.plist.template).
 
 ## Logs and troubleshooting
 
