@@ -34,7 +34,7 @@ It runs on macOS and Linux, without Docker, and listens exclusively on `127.0.0.
 Requirements: macOS or Linux, Python 3.12+ (tested with 3.14) and internet access for the first install.
 
 ```bash
-git clone https://github.com/pingulinux87/pulse-wire.git
+git clone https://github.com/Ax3Kpital/pulse-wire.git
 cd pulse-wire
 scripts/setup.sh
 ```
