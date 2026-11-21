@@ -11,13 +11,15 @@ PYTHON_BIN="${PYTHON_BIN:-$(command -v python3.14 || command -v python3.13 || co
 
 if ! command -v node >/dev/null 2>&1; then
   echo "Node not found: installing the official LTS binary into .tools/ (checksum verified)"
-  ARCH="$(uname -m)"; [ "$ARCH" = "x86_64" ] && ARCH="x64"
+  ARCH="$(uname -m)"; [ "$ARCH" = "x86_64" ] && ARCH="x64"; [ "$ARCH" = "aarch64" ] && ARCH="arm64"
+  case "$(uname -s)" in Darwin) OS=darwin ;; Linux) OS=linux ;; *) echo "Unsupported OS: install Node LTS manually"; exit 1 ;; esac
+  SHA="shasum -a 256"; command -v shasum >/dev/null 2>&1 || SHA=sha256sum
   V="$(curl -fsSL https://nodejs.org/dist/index.json | "$PY" -c 'import json,sys; print(next(x["version"] for x in json.load(sys.stdin) if x["lts"]))')"
   mkdir -p .tools && cd .tools
-  TAR="node-$V-darwin-$ARCH.tar.gz"
+  TAR="node-$V-$OS-$ARCH.tar.gz"
   curl -fsSLO "https://nodejs.org/dist/$V/$TAR"
-  curl -fsSL "https://nodejs.org/dist/$V/SHASUMS256.txt" | grep " $TAR\$" | shasum -a 256 -c -
-  tar xzf "$TAR" && rm "$TAR" && ln -sfn "node-$V-darwin-$ARCH" node
+  curl -fsSL "https://nodejs.org/dist/$V/SHASUMS256.txt" | grep " $TAR\$" | $SHA -c -
+  tar xzf "$TAR" && rm "$TAR" && ln -sfn "node-$V-$OS-$ARCH" node
   cd "$REPO"
   export PATH="$REPO/.tools/node/bin:$PATH"
 fi

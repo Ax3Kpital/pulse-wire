@@ -1,7 +1,7 @@
 # News Aggregator (local, single-user)
 
 A local news aggregator for earnings, companies, geopolitics and monetary policy.
-It runs on macOS only, without Docker, and listens exclusively on `127.0.0.1:8765`.
+It runs on macOS and Linux, without Docker, and listens exclusively on `127.0.0.1:8765`. (Windows: use WSL.) Only the optional autostart helper is macOS-specific.
 
 - **One story per card.** When several publications report the same event, their reports appear in a collapsible list, each with attribution and an `Open original` link.
 - **Explainable categories:** Geopolitics (US, China, Europe, Russia), FED (Rates, CPI, PCE, Jobs, Speeches), Energy, Banking, Biotech, Pharma, Oil & Gas, Tech. Classification is rule-based (section, keywords, entities), and the reason behind each label is stored.
@@ -25,13 +25,13 @@ It runs on macOS only, without Docker, and listens exclusively on `127.0.0.1:876
 7. [Impact score 1–10 and colours](#impact-score-110-and-colours)
 8. [Tests](#tests)
 9. [SQLite backup and restore](#sqlite-backup-and-restore)
-10. [Autostart (LaunchAgent)](#autostart-launchagent)
+10. [Autostart (LaunchAgent, macOS only)](#autostart-launchagent-macos-only)
 11. [Logs and troubleshooting](#logs-and-troubleshooting)
 12. [Source access rules](#source-access-rules)
 
 ## Installation
 
-Requirements: macOS, Python 3.12+ (tested with 3.14) and internet access for the first install.
+Requirements: macOS or Linux, Python 3.12+ (tested with 3.14) and internet access for the first install.
 
 ```bash
 git clone <repository-url> news-aggregator
@@ -234,7 +234,9 @@ For an automatic daily backup, add to `crontab -e`:
 0 3 * * * /Users/<user>/news-aggregator/scripts/backup.sh >/dev/null 2>&1
 ```
 
-## Autostart (LaunchAgent)
+## Autostart (LaunchAgent, macOS only)
+
+On Linux, run `scripts/start.sh` from a systemd user unit or any process manager instead.
 
 ```bash
 scripts/launchagent.sh install    # installs into ~/Library/LaunchAgents and starts now + at every login
